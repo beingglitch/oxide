@@ -38,7 +38,7 @@ mod tests {
 
         assert!(result.is_err());
 
-        if let Err(Oxide::FileReadError(msg)) = result {
+        if let Err(OxideError::FileReadError(msg)) = result {
             assert!(msg.contains("No such file") || msg.contains("cannot find"));
         } else {
             panic!("Expected FileReadError");
