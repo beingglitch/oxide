@@ -1,3 +1,5 @@
+use crate::errors::OxideError;
+
 const MAGIC: &[u8; 5] = b"OXIDE";
 
 pub fn encrypt(data: &Vec<u8>, key: &str) -> Vec<u8> {
@@ -5,7 +7,7 @@ pub fn encrypt(data: &Vec<u8>, key: &str) -> Vec<u8> {
     let keystream = generate_keystream(key, new_data.len());
     new_data.iter().zip(keystream.iter()).map(|pair| pair.0 ^ pair.1).collect()
 }
-pub fn decrypt(encrypted_data: &Vec<u8>, key: &str) -> Result<Vec<u8>, &'static str> {
+pub fn decrypt(encrypted_data: &Vec<u8>, key: &str) -> Result<Vec<u8>, OxideError> {
     let keystream = generate_keystream(key, encrypted_data.len());
     let decrypted_data: Vec<u8> = encrypted_data.iter().zip(keystream.iter()).map(|pair| pair.0 ^ pair.1).collect();
 
@@ -13,7 +15,7 @@ pub fn decrypt(encrypted_data: &Vec<u8>, key: &str) -> Result<Vec<u8>, &'static 
     if decrypted_data[0..MAGIC.len()] == *MAGIC {
         Ok(decrypted_data[MAGIC.len()..].to_vec())
     } else {
-        Err("Wrong Password")
+        Err(OxideError::WrongPassword)
     }
 }
 
