@@ -20,10 +20,11 @@ pub fn decrypt(encrypted_data: &Vec<u8>, key: &str) -> Result<Vec<u8>, OxideErro
 }
 
 
-pub fn generate_keystream(seed: &[u8], length: usize) -> Vec<u8> {
+pub fn generate_keystream(key: &[u8], length: usize) -> Vec<u8> {
     // key_bytes.iter().cycle().take(length).copied() -> lazy stages; copied gives ownership from references
     // .collec() -> consuming adaptor
-    let keystream = seed.iter().cycle().take(length).copied().collect();
+
+    let keystream = derive_seed(key).iter().cycle().take(length).copied().collect();
 
     keystream
 }
