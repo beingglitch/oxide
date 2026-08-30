@@ -3,7 +3,7 @@ mod cipher;
 
 use clap::{Parser, Subcommand};
 
-use crate::{cipher::{encrypt, decrypt}, data::{get_data, set_data}};
+use crate::{cipher::{decrypt, encrypt}, data::{get_data, set_data}};
 
 
 #[derive(Parser)]
@@ -15,29 +15,40 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     Encrypt {
-        file: String
+        file: String,
+        #[arg(short, long)]
+        password: String
     },
     Decrypt {
-        file: String
+        file: String,
+        #[arg(short, long)]
+        password: String
     }
 }
 
 
 fn main() {
     let cli = Cli::parse();
-    let key: u8 = 42;
 
     match cli.commands {
-        Commands::Encrypt { file } => {
+        Commands::Encrypt { file, password } => {
             println!("file name: {}", file);
             let data = get_data(file).unwrap();
-            set_data(&encrypt(&data, &key), Some("encrypted.txt".to_string())).unwrap();
+            set_data(&encrypt(&data, &password), Some("encrypted.txt".to_string())).unwrap();
         },
 
-        Commands::Decrypt { file } => {
+        Commands::Decrypt { file, password } => {
             println!("file name: {}", file);
             let encrypted_data = get_data(file).unwrap();
-            set_data(&decrypt(&encrypted_data, &key), Some("decrypted.txt".to_string())).unwrap();
+            match decrypt(&encrypted_data, &password) {
+                Ok(data) => {
+                    set_data(&data, Some("decrypted.txt".to_string())).unwrap()
+                },
+                Err(err) => {
+                    println!("{err}")
+                }
+            }
+            
         }
     }
 }
