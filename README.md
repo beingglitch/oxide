@@ -29,12 +29,13 @@ This is a work in progress, being built incrementally. See Roadmap below for wha
 
 ## Roadmap
 
-- [x] CLI scaffold (clap, derive macros, encrypt/decrypt subcommands)
+[x] CLI scaffold (clap, derive macros, encrypt/decrypt subcommands)
 - [x] File I/O module (read/write, `Result`-based errors)
 - [x] Core XOR cipher, round-trip verified
-- [x] Real key derivation from a user-supplied password
-- [x] Keystream generation (stretching a short key across an arbitrary-length file)
-- [ ] Proper error handling throughout (custom error enum, no `.unwrap()`)
+- [x] Keystream generation (cycling password bytes across an arbitrary-length file)
+- [x] Magic-byte prefix for wrong-password detection
+- [x] Custom error type (`thiserror`), `?`-based propagation, no `.unwrap()`
+- [ ] Proper key derivation (mixing/hash step to fix the prefix-collision weakness above)
 - [ ] Streamed file I/O for large files (`BufReader`/`BufWriter`)
 - [ ] Unit tests (encrypt→decrypt round-trip, edge cases)
 - [ ] `clippy`-clean, documented (`///`) public API
