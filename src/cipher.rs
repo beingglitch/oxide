@@ -1,35 +1,23 @@
-use crate::errors::OxideError;
+use crate::constants::SEED_SIZE;
 
-const MAGIC: &[u8; 5] = b"OXIDE";
 
-pub fn encrypt(data: &Vec<u8>, key: &str) -> Vec<u8> {
-    let new_data: Vec<u8> = MAGIC.iter().chain(data.iter()).copied().collect();
-    let keystream = generate_keystream(key.as_bytes(), new_data.len());
-    new_data.iter().zip(keystream.iter()).map(|pair| pair.0 ^ pair.1).collect()
+pub fn encrypt(data: &Vec<u8>, keystream: Vec<u8>) -> Vec<u8> {
+    data.iter().zip(keystream.iter()).map(|pair| pair.0 ^ pair.1).collect()
 }
-pub fn decrypt(encrypted_data: &Vec<u8>, key: &str) -> Result<Vec<u8>, OxideError> {
-    let keystream = generate_keystream(key.as_bytes(), encrypted_data.len());
-    let decrypted_data: Vec<u8> = encrypted_data.iter().zip(keystream.iter()).map(|pair| pair.0 ^ pair.1).collect();
-
-    // Check password or written decrypted file
-    if decrypted_data[0..MAGIC.len()] == *MAGIC {
-        Ok(decrypted_data[MAGIC.len()..].to_vec())
-    } else {
-        Err(OxideError::WrongPassword)
-    }
+pub fn decrypt(encrypted_data: &Vec<u8>, keystream: Vec<u8>) -> Vec<u8> {
+    encrypted_data.iter().zip(keystream.iter()).map(|pair| pair.0 ^ pair.1).collect()
 }
 
 
-pub fn generate_keystream(key: &[u8], length: usize) -> Vec<u8> {
+pub fn generate_keystream(seed: &[u8; SEED_SIZE], length: usize, pointer: usize) -> Vec<u8> {
     // key_bytes.iter().cycle().take(length).copied() -> lazy stages; copied gives ownership from references
     // .collec() -> consuming adaptor
 
-    let keystream = derive_seed(key).iter().cycle().take(length).copied().collect();
+    let keystream: Vec<u8> = seed.iter().cycle().take(pointer + length).copied().collect();
 
-    keystream
+    keystream[pointer..].to_vec()
 }
 
-const SEED_SIZE: usize = 32;
 
 // Old logic (had a rotation-mod-8 collision, see: seed[0] == seed[8]):
 // for i in 0..SEED_SIZE {

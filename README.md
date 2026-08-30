@@ -35,7 +35,7 @@ This is a work in progress, being built incrementally. See Roadmap below for wha
 - [x] Keystream generation (cycling password bytes across an arbitrary-length file)
 - [x] Magic-byte prefix for wrong-password detection
 - [x] Custom error type (`thiserror`), `?`-based propagation, no `.unwrap()`
-- [ ] Proper key derivation (mixing/hash step to fix the prefix-collision weakness above)
+- [x] Proper key derivation (mixing/hash step to fix the prefix-collision weakness above)
 - [ ] Streamed file I/O for large files (`BufReader`/`BufWriter`)
 - [ ] Unit tests (encrypt→decrypt round-trip, edge cases)
 - [ ] `clippy`-clean, documented (`///`) public API
