@@ -1,14 +1,23 @@
 use crate::constants::SEED_SIZE;
 
 
+/// XORs `data` against `keystream` byte-by-byte. Used for both encryption
+/// and decryption, since XOR is its own inverse -> the same operation
+/// applied twice with the same keystream recovers the original bytes.
 pub fn encrypt(data: &[u8], keystream: Vec<u8>) -> Vec<u8> {
     data.iter().zip(keystream.iter()).map(|pair| pair.0 ^ pair.1).collect()
 }
+
+/// Identical operation to `encrypt` -> XOR is symmetric, so decryption
+/// is just encryption applied again with the same keystream.
 pub fn decrypt(encrypted_data: &[u8], keystream: Vec<u8>) -> Vec<u8> {
     encrypted_data.iter().zip(keystream.iter()).map(|pair| pair.0 ^ pair.1).collect()
 }
 
-
+/// Generates `data_length` bytes of keystream from `seed`, starting at
+/// `pointer` bytes into the seed's infinitely repeating cycle. Used to
+/// keep the keystream in sync across chunked reads/writes, where each
+/// chunk continues from where the previous one left off.
 pub fn generate_keystream(seed: &[u8; SEED_SIZE], data_length: usize, pointer: usize) -> Vec<u8> {
     // key_bytes.iter().cycle().take(length).copied() -> lazy stages; copied gives ownership from references
     // .collec() -> consuming adaptor
@@ -28,6 +37,9 @@ pub fn generate_keystream(seed: &[u8; SEED_SIZE], data_length: usize, pointer: u
 // But this was causing a issue i.e., every i/8th rotation is same means 1, 9, 17 produces 
 // same number after rotation when rotating number is of 8 bit
 
+/// Derives a fixed-size seed from a password using a chained mixing process
+/// (rotate + XOR), where each output byte depends on the accumulated state
+/// from all previous bytes rather than a fresh computation per position.
 pub fn derive_seed(password: &[u8]) -> [u8; SEED_SIZE] {
 
     let mut accumulator:[u8; SEED_SIZE] = [0; SEED_SIZE];
