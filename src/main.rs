@@ -5,7 +5,7 @@ mod constants;
 use std::{fs::File, io::{BufReader, BufWriter, Read, Write}};
 use clap::{Parser, Subcommand};
 
-use crate::{cipher::{decrypt, derive_seed, encrypt, generate_keystream}, constants::{BUFFER_SIZE, MAGIC}, data::{get_data, set_data}, errors::OxideError};
+use crate::{cipher::{decrypt, derive_seed, encrypt, generate_keystream}, constants::{BUFFER_SIZE, MAGIC}, errors::OxideError};
 
 
 #[derive(Parser)]

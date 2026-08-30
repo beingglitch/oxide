@@ -9,11 +9,11 @@ pub fn decrypt(encrypted_data: &Vec<u8>, keystream: Vec<u8>) -> Vec<u8> {
 }
 
 
-pub fn generate_keystream(seed: &[u8; SEED_SIZE], length: usize, pointer: usize) -> Vec<u8> {
+pub fn generate_keystream(seed: &[u8; SEED_SIZE], data_length: usize, pointer: usize) -> Vec<u8> {
     // key_bytes.iter().cycle().take(length).copied() -> lazy stages; copied gives ownership from references
     // .collec() -> consuming adaptor
 
-    let keystream: Vec<u8> = seed.iter().cycle().take(pointer + length).copied().collect();
+    let keystream: Vec<u8> = seed.iter().cycle().take(pointer + data_length).copied().collect();
 
     keystream[pointer..].to_vec()
 }
@@ -55,5 +55,64 @@ mod tests {
         let seed = derive_seed(b"testpassword");
         assert_ne!(seed[0], seed[8]);
         assert_ne!(seed[16], seed[8]);
+    }
+
+    #[test]
+    fn round_trip_test() {
+        let data = b"hello world!";
+
+        let password = "hunter";
+
+        let seed = derive_seed(password.as_bytes());
+
+        let keystream = generate_keystream(&seed, data.len(), 0);
+
+        let encrypted_data = encrypt(&data.to_vec(), keystream.clone());
+
+        let decrypted_data = decrypt(&encrypted_data, keystream);
+
+        assert_eq!(decrypted_data, data)
+    }
+
+    #[test]
+    fn wrong_key_produces_different_output() {
+        let data = b"hello world!";
+
+        // encryption
+        let password = "hunter";
+
+        let seed = derive_seed(password.as_bytes());
+
+        let keystream = generate_keystream(&seed, data.len(), 0);
+
+        let encrypted_data = encrypt(&data.to_vec(), keystream.clone());
+
+        // decryption
+        let password = "xhunter";
+
+        let seed = derive_seed(password.as_bytes());
+
+        let keystream = generate_keystream(&seed, data.len(), 0);
+
+        let decrypted_data = decrypt(&encrypted_data, keystream);
+
+        assert_ne!(decrypted_data, data)    
+    }
+
+    #[test]
+    fn empty_input_test() {
+        let data = b"";
+
+        let password = "hunter";
+
+        let seed = derive_seed(password.as_bytes());
+
+        let keystream = generate_keystream(&seed, data.len(), 0);
+
+        let encrypted_data = encrypt(&data.to_vec(), keystream.clone());
+
+        let decrypted_data = decrypt(&encrypted_data, keystream);
+
+        assert_eq!(decrypted_data, data)
     }
 }
