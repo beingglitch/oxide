@@ -7,7 +7,7 @@ A file encryption CLI built from scratch in Rust. No `RustCrypto`, no `aes`/`cha
 ## Install
 
 ```
-cargo install --path .
+cargo install oxide-cipher
 ```
 
 ## Usage
