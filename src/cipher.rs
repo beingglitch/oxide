@@ -1,10 +1,10 @@
 use crate::constants::SEED_SIZE;
 
 
-pub fn encrypt(data: &Vec<u8>, keystream: Vec<u8>) -> Vec<u8> {
+pub fn encrypt(data: &[u8], keystream: Vec<u8>) -> Vec<u8> {
     data.iter().zip(keystream.iter()).map(|pair| pair.0 ^ pair.1).collect()
 }
-pub fn decrypt(encrypted_data: &Vec<u8>, keystream: Vec<u8>) -> Vec<u8> {
+pub fn decrypt(encrypted_data: &[u8], keystream: Vec<u8>) -> Vec<u8> {
     encrypted_data.iter().zip(keystream.iter()).map(|pair| pair.0 ^ pair.1).collect()
 }
 
@@ -33,7 +33,7 @@ pub fn derive_seed(password: &[u8]) -> [u8; SEED_SIZE] {
     let mut accumulator:[u8; SEED_SIZE] = [0; SEED_SIZE];
 
     for byte in password {
-        accumulator[0] = accumulator[0].rotate_left((1) as u32) ^ byte;
+        accumulator[0] = accumulator[0].rotate_left(1_u32) ^ byte;
     }
 
     for i in 1..SEED_SIZE {

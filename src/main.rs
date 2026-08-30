@@ -47,12 +47,12 @@ fn main() -> Result<(), OxideError> {
             let mut writer = BufWriter::new(output_file);
             let mut buffer = [0u8; BUFFER_SIZE];
 
-            let seed = derive_seed(&password.as_bytes());
+            let seed = derive_seed(password.as_bytes());
             let mut pointer: usize = 0;
 
             // Add MAGIC
             let keystream: Vec<u8> = generate_keystream(&seed, MAGIC.len(), pointer);
-            writer.write_all(&encrypt(&MAGIC.to_vec(), keystream)).map_err(OxideError::WriteFailed)?;
+            writer.write_all(&encrypt(MAGIC.as_ref(), keystream)).map_err(OxideError::WriteFailed)?;
             pointer += MAGIC.len();
 
             loop {
@@ -64,7 +64,7 @@ fn main() -> Result<(), OxideError> {
 
                 let keystream: Vec<u8> = generate_keystream(&seed, bytes_read, pointer);
                 pointer += bytes_read;
-                writer.write_all(&encrypt(&chunk.to_vec(), keystream)).map_err(OxideError::WriteFailed)?;
+                writer.write_all(&encrypt(chunk, keystream)).map_err(OxideError::WriteFailed)?;
             }
         },
 
@@ -77,7 +77,7 @@ fn main() -> Result<(), OxideError> {
             let mut writer = BufWriter::new(output_file);
             let mut buffer = [0u8; BUFFER_SIZE];
 
-            let seed = derive_seed(&password.as_bytes());
+            let seed = derive_seed(password.as_bytes());
             let mut pointer: usize = 0;
 
             // Read MAGIC
@@ -85,7 +85,7 @@ fn main() -> Result<(), OxideError> {
 
             reader.read_exact(&mut magic_buffer).map_err(OxideError::ReadFailed)?;
             let keystream: Vec<u8> = generate_keystream(&seed, MAGIC.len(), pointer);
-            if decrypt(&magic_buffer.to_vec(), keystream) != MAGIC {
+            if decrypt(magic_buffer.as_ref(), keystream) != MAGIC {
                 return Err(OxideError::WrongPassword);
             }
 
@@ -100,7 +100,7 @@ fn main() -> Result<(), OxideError> {
 
                 let keystream: Vec<u8> = generate_keystream(&seed, bytes_read, pointer);
                 pointer += bytes_read;
-                writer.write_all(&decrypt(&chunk.to_vec(), keystream)).map_err(OxideError::WriteFailed)?;
+                writer.write_all(&decrypt(chunk, keystream)).map_err(OxideError::WriteFailed)?;
             }
         }
     }
